@@ -4,11 +4,11 @@ synopsis:            Package with monique component
 description:
   The package covers:
   .
-    * component base functions
+    * component basic functions
 homepage:            https://github.com/biocad/mq-component-hs
 license:             BSD3
 license-file:        LICENSE
-author:              Bogdan Neterebskii, Vladimir Morozov, Sofya Kochkova, Alexander Sadovnikov
+author:              Bogdan Neterebskii, Vladimir Morozov, Alexander Sadovnikov
 maintainer:          neterebskiy@biocad.ru
 copyright:           (c) 2018, BIOCAD
 category:            System
@@ -18,11 +18,69 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     
-  other-modules:       
+  exposed-modules:     System.MQ.Component
+                     , System.MQ.Component.Atomic
+                     , System.MQ.Component.Env
+                     , System.MQ.Component.Config
+                     , System.MQ.Component.App
+                     , System.MQ.Component.Technical
+                     , System.MQ.Component.Transport
+
+  other-modules:       System.MQ.Component.Atomic.Internal.Types
+                     , System.MQ.Component.Atomic.Internal.Functions
+
+                     
+                     , System.MQ.Component.Technical.Internal.Kill
+                     , System.MQ.Component.Technical.Internal.Monitoring
+                     
+                
   build-depends:       base >= 4.7 && < 5
+                     , aeson
+                     , aeson-casing
+                     , aeson-picker
+                     , bcd-config
+                     , bytestring
+                     , data-msgpack
+                     , data-msgpack-types
+                     , lens
+                     , hslogger
+                     , mq
+                     , mtl
+                     , semigroups
+                     , text
+                     , unix-time
   ghc-options:         -Wall -O2
   default-language:    Haskell2010
+  
+executable example-speaker
+  hs-source-dirs:      app
+  main-is:             ExampleSpeaker.hs
+  build-depends:       base
+                     , aeson
+                     , mq
+                     , mq-component-hs
+  default-language:    Haskell2010
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -O2
+
+executable example-listener
+  hs-source-dirs:      app
+  main-is:             ExampleListener.hs
+  build-depends:       base
+                     , aeson
+                     , mq
+                     , mq-component-hs
+  default-language:    Haskell2010
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -O2
+
+executable example-controlled
+  hs-source-dirs:      app
+  main-is:             ExampleControlled.hs
+  build-depends:       base
+                     , aeson
+                     , mq
+                     , mq-component-hs
+  default-language:    Haskell2010
+  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -O2
 
 
 source-repository head

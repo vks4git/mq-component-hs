@@ -43,6 +43,16 @@
                 "host": "localhost",
                 "port": 10000
             }
+        },
+        "example_killable": {
+            "creator": "0000-0000-0000-killable",
+            "logfile": "/tmp/example_killable.log",
+            "frequency": 60000
+        },
+        "killer": {
+            "creator": "0000-0000-0000-kill",
+            "logfile": "/tmp/kill.log",
+            "frequency": 60000
         }
     }
 }

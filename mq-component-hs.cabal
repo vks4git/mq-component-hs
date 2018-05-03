@@ -1,5 +1,5 @@
 name:                mq-component-hs
-version:             0.1.0.0
+version:             0.1.0.1
 synopsis:            Package with monique component
 description:
   The package covers:
@@ -25,6 +25,7 @@ library
                      , System.MQ.Component.App
                      , System.MQ.Component.Technical
                      , System.MQ.Component.Transport
+                     , System.MQ.Component.Template.Listener
 
   other-modules:       System.MQ.Component.Atomic.Internal.Types
                      , System.MQ.Component.Atomic.Internal.Functions
@@ -32,6 +33,8 @@ library
                      
                      , System.MQ.Component.Technical.Internal.Kill
                      , System.MQ.Component.Technical.Internal.Monitoring
+                     
+                     , System.MQ.Component.Template.DataObtainer
                      
                 
   build-depends:       base >= 4.7 && < 5

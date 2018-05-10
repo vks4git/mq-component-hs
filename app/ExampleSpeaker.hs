@@ -1,5 +1,6 @@
-{-# LANGUAGE DeriveGeneric   #-}
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE DeriveGeneric     #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards   #-}
 
 module Main where
 
@@ -19,9 +20,9 @@ import           System.MQ.Protocol            (MessageLike (..),
                                                 jsonEncoding, notExpires)
 
 main :: IO ()
-main = runApp "example_speaker" simpleSpeaker
+main = runApp "example_speaker-hs" simpleSpeaker
 
-newtype ExampleSimpleConfig = ExampleSimpleConfig {config :: Int}
+newtype ExampleSimpleConfig = ExampleSimpleConfig {message :: String}
   deriving (Show, Generic)
 
 instance ToJSON ExampleSimpleConfig
@@ -37,8 +38,8 @@ simpleSpeaker :: Env -> MQMonad ()
 simpleSpeaker env@Env{..} = do
     TwoChannels{..} <- load2Channels
     forever $ do
-        msg <- createMessage emptyHash creator notExpires $ ExampleSimpleConfig 15
+        msg <- createMessage emptyHash creator notExpires $ ExampleSimpleConfig "Hello! It's haskell simple speaker."
 
         push toScheduler env msg
-        liftIO $ print "sent"
+        liftIO $ print msg
         liftIO $ threadDelay 1000000

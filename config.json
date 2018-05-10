@@ -17,7 +17,7 @@
         }
     },
     "params":{
-        "example_speaker": {
+        "example_speaker-hs": {
             "creator": "0000-0000-0000-speaker",
             "logfile": "/tmp/example_speaker.log",
             "frequency": 60000,
@@ -26,7 +26,7 @@
                 "port": ""
             }
         },
-        "example_listener": {
+        "example_listener-hs": {
             "creator": "0000-0000-0000-listener",
             "logfile": "/tmp/example_listener.log",
             "frequency": 60000,

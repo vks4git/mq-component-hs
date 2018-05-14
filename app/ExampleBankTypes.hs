@@ -5,7 +5,9 @@ module ExampleBankTypes
   , BankResult (..)
   ) where
 
-import           Data.Aeson              (FromJSON (..), ToJSON (..))
+import           Data.Aeson              (FromJSON (..), ToJSON (..),
+                                          genericParseJSON, genericToJSON)
+import           Data.Aeson.Casing       (aesonPrefix, snakeCase)
 import           GHC.Generics            (Generic)
 import qualified System.MQ.Encoding.JSON as JSON (pack, unpack)
 import           System.MQ.Protocol      (MessageLike (..), MessageType (..),
@@ -13,13 +15,15 @@ import           System.MQ.Protocol      (MessageLike (..), MessageType (..),
 
 -- | 'BankConfig' represents configuration data for bank.
 --
-data BankConfig = BankConfig { months  :: Int
-                             , payment :: Float
+data BankConfig = BankConfig { months   :: Int
+                             , perMonth :: Float
                              }
   deriving (Show, Generic)
 
-instance ToJSON BankConfig
-instance FromJSON BankConfig
+instance ToJSON BankConfig where
+  toJSON = genericToJSON $ aesonPrefix snakeCase
+instance FromJSON BankConfig where
+  parseJSON = genericParseJSON $ aesonPrefix snakeCase
 instance MessageLike BankConfig where
   props = Props "example_bank" Config jsonEncoding
   pack = JSON.pack

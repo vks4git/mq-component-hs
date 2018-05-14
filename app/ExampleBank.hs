@@ -19,7 +19,7 @@ main = runApp "example_bank-hs" $ workerScheduler bankWorkerAction
 --
 bankWorkerAction :: MQAction BankConfig BankResult
 bankWorkerAction env@Env{..} BankConfig{..} = do
-    let calculatorConfig = CalculatorConfig (fromIntegral months) payment "multiplys"
+    let calculatorConfig = CalculatorConfig (fromIntegral months) perMonth "*"
     taskId <- getLastMsgId atomic
 
     BankResult . answer <$> callForeignComponent env taskId notExpires calculatorConfig

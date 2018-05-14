@@ -19,7 +19,7 @@ main = runApp "example_calculator-hs" $ workerScheduler calculatorWorkerAction
 calculatorWorkerAction :: MQAction CalculatorConfig CalculatorResult
 calculatorWorkerAction _ CalculatorConfig{..} =
   case action of
-    "sum"      -> return $ CalculatorResult $ first + second
-    "multiply" -> return $ CalculatorResult $ first * second
-    m          -> throwComponentError $ "Unknown calculator action: " ++ m
+    "+" -> return $ CalculatorResult $ first + second
+    "*" -> return $ CalculatorResult $ first * second
+    m   -> throwComponentError $ "Unknown calculator action: " ++ m
 

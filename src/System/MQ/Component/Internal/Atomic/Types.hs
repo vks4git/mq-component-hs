@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module System.MQ.Component.Atomic.Internal.Types
+module System.MQ.Component.Internal.Atomic.Types
   ( Atomic (..)
   , IsAlive
   , lastMsgId

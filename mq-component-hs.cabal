@@ -1,5 +1,5 @@
 name:                mq-component-hs
-version:             0.1.0.1
+version:             0.1.1.0
 synopsis:            Package with monique component
 description:
   The package covers:
@@ -19,24 +19,27 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     System.MQ.Component
-                     , System.MQ.Component.Atomic
-                     , System.MQ.Component.Env
-                     , System.MQ.Component.Config
-                     , System.MQ.Component.App
-                     , System.MQ.Component.Technical
-                     , System.MQ.Component.Transport
-                     , System.MQ.Component.Template.Listener
-
-  other-modules:       System.MQ.Component.Atomic.Internal.Types
-                     , System.MQ.Component.Atomic.Internal.Functions
-
+                     , System.MQ.Component.Extras
+  other-modules:       System.MQ.Component.Internal.Atomic.Types
+                     , System.MQ.Component.Internal.Atomic.Functions
                      
-                     , System.MQ.Component.Technical.Internal.Kill
-                     , System.MQ.Component.Technical.Internal.Monitoring
+                     , System.MQ.Component.Internal.Atomic
+                     , System.MQ.Component.Internal.Env
+                     , System.MQ.Component.Internal.Config
+                     , System.MQ.Component.Internal.App
+                     , System.MQ.Component.Internal.Transport
+       
+                     , System.MQ.Component.Internal.Technical.Kill
+                     , System.MQ.Component.Internal.Technical.Monitoring
                      
-                     , System.MQ.Component.Template.DataObtainer
+                     , System.MQ.Component.Extras.Template.Listener
+                     , System.MQ.Component.Extras.Template.Types
+                     , System.MQ.Component.Extras.Template.Worker
                      
-                
+                     , System.MQ.Component.Extras.Error
+                     , System.MQ.Component.Extras.Foreign
+                     , System.MQ.Component.Extras.Template
+                     
   build-depends:       base >= 4.7 && < 5
                      , aeson
                      , aeson-casing
@@ -55,9 +58,10 @@ library
   ghc-options:         -Wall -O2
   default-language:    Haskell2010
   
-executable example-speaker
+executable example-radio-speaker
   hs-source-dirs:      app
-  main-is:             ExampleSpeaker.hs
+  main-is:             ExampleRadioSpeaker.hs
+  other-modules:       ExampleRadioTypes
   build-depends:       base
                      , aeson
                      , mq
@@ -65,19 +69,10 @@ executable example-speaker
   default-language:    Haskell2010
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -O2
 
-executable example-listener
+executable example-radio-listener
   hs-source-dirs:      app
-  main-is:             ExampleListener.hs
-  build-depends:       base
-                     , aeson
-                     , mq
-                     , mq-component-hs
-  default-language:    Haskell2010
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -O2
-
-executable example-controlled
-  hs-source-dirs:      app
-  main-is:             ExampleControlled.hs
+  main-is:             ExampleRadioListener.hs
+  other-modules:       ExampleRadioTypes
   build-depends:       base
                      , aeson
                      , mq
@@ -85,19 +80,24 @@ executable example-controlled
   default-language:    Haskell2010
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -O2
   
-executable example-killable
+executable example-calculator
   hs-source-dirs:      app
-  main-is:             ExampleKillable.hs
+  main-is:             ExampleCalculator.hs
+  other-modules:       ExampleCalculatorTypes
   build-depends:       base
+                     , aeson
                      , mq
                      , mq-component-hs
   default-language:    Haskell2010
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -O2
   
-executable killer
+executable example-bank
   hs-source-dirs:      app
-  main-is:             Killer.hs
+  main-is:             ExampleBank.hs
+  other-modules:       ExampleBankTypes
+                     , ExampleCalculatorTypes
   build-depends:       base
+                     , aeson
                      , mq
                      , mq-component-hs
   default-language:    Haskell2010

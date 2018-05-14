@@ -1,7 +1,8 @@
-module System.MQ.Component.Atomic.Internal.Functions
+module System.MQ.Component.Internal.Atomic.Functions
   (
     createAtomic
   , createAtomicMVar
+  , getLastMsgId
   , updateIsAlive
   , updateMessage
   , updateLastMsgId
@@ -16,10 +17,13 @@ import           Control.Concurrent.MVar                   (MVar, modifyMVar_,
                                                             tryReadMVar)
 import           Control.Lens                              (set, view)
 import           Control.Monad                             ((>=>))
+import           Control.Monad.Except                      (throwError)
 import           Control.Monad.IO.Class                    (MonadIO, liftIO)
-import           System.MQ.Component.Atomic.Internal.Types (Atomic (..),
+import           System.MQ.Component.Internal.Atomic.Types (Atomic (..),
                                                             IsAlive, isAlive,
                                                             lastMsgId, message)
+import           System.MQ.Monad                           (MQError (..),
+                                                            MQMonad)
 import           System.MQ.Protocol                        (Hash, emptyHash)
 
 -- | Creates new 'Atomic' with information only about communication 'ThreadId'.
@@ -40,7 +44,7 @@ updateIsAlive st atomic = liftIO $ modifyMVar_ atomic (pure . set isAlive st)
 -- | Updates message field in 'Atomic'.
 --
 updateMessage :: MonadIO m => String -> MVar Atomic -> m ()
-updateMessage msg atomic = liftIO $ modifyMVar_ atomic (pure . set message msg)
+updateMessage ms atomic = liftIO $ modifyMVar_ atomic (pure . set message ms)
 
 -- | Updates lastMsg field in 'Atomic'.
 --
@@ -51,6 +55,14 @@ updateLastMsgId lmsg atomic = liftIO $ modifyMVar_ atomic (pure . set lastMsgId 
 --
 tryLastMsgId :: MonadIO m => MVar Atomic -> m (Maybe Hash)
 tryLastMsgId = (liftIO . tryReadMVar) >=> pure . fmap (view lastMsgId)
+
+-- | Returns lastMsg from 'Atomic'. Throws an error if 'Atomic' is empty.
+--
+getLastMsgId :: MVar Atomic -> MQMonad Hash
+getLastMsgId = fromMMQ . tryLastMsgId
+  where
+    fromMMQ :: MQMonad (Maybe Hash) -> MQMonad Hash
+    fromMMQ = (maybe (throwError $ MQComponentError "Can't get message id because from Atomic.") pure =<<)
 
 -- | Returns isAlive from 'Atomic' if possible.
 --

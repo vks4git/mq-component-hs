@@ -19,7 +19,7 @@ import           System.MQ.Protocol            (Message (..), MessageLike (..),
 import           Text.Printf                   (printf)
 
 main :: IO ()
-main = runApp "example_controlled" exampleControlled
+main = runApp "example_controlled-hs" exampleControlled
 
 newtype ExampleSimpleConfig = ExampleSimpleConfig { config :: Int }
   deriving (Show, Generic)

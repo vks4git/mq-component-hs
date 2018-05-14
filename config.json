@@ -17,25 +17,25 @@
         }
     },
     "params":{
-        "example_speaker-hs": {
-            "creator": "0000-0000-0000-speaker",
-            "logfile": "/tmp/example_speaker.log",
+        "example_radio-speaker-hs": {
+            "creator": "0000-0000-0000-radio-speaker",
+            "logfile": "/tmp/example_radio-speaker.log",
             "frequency": 60000,
             "controller": {
                 "host": "",
                 "port": ""
             }
         },
-        "example_listener-hs": {
-            "creator": "0000-0000-0000-listener",
-            "logfile": "/tmp/example_listener.log",
+        "example_radio-listener-hs": {
+            "creator": "0000-0000-0000-radio-listener",
+            "logfile": "/tmp/example_radio-listener.log",
             "frequency": 60000,
             "controller": {
                 "host": "",
                 "port": ""
             }
         },
-        "example_controlled": {
+        "example_controlled-hs": {
             "creator": "0000-0000-0000-controlled",
             "logfile": "/tmp/example_controlled.log",
             "frequency": 60000,
@@ -44,7 +44,7 @@
                 "port": 10000
             }
         },
-        "example_killable": {
+        "example_killable-hs": {
             "creator": "0000-0000-0000-killable",
             "logfile": "/tmp/example_killable.log",
             "frequency": 60000
@@ -53,6 +53,24 @@
             "creator": "0000-0000-0000-kill",
             "logfile": "/tmp/kill.log",
             "frequency": 60000
+        },
+        "example_calculator-hs": {
+            "creator": "0000-0000-0000-calculator",
+            "logfile": "/tmp/example_calculator.log",
+            "frequency": 60000,
+            "controller": {
+                "host": "",
+                "port": ""
+            }
+        },
+        "example_bank-hs": {
+            "creator": "0000-0000-0000-bank",
+            "logfile": "/tmp/example_bank.log",
+            "frequency": 60000,
+            "controller": {
+                "host": "",
+                "port": ""
+            }
         }
     }
 }

@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module System.MQ.Component.Transport
+module System.MQ.Component.Internal.Transport
   ( PubChannel
   , PullChannel
   , PushChannel
@@ -11,13 +11,13 @@ module System.MQ.Component.Transport
   , sub
   ) where
 
-import           System.MQ.Component.Atomic (updateLastMsgId)
-import           System.MQ.Component.Env    (Env (..))
-import           System.MQ.Monad            (MQMonad)
-import           System.MQ.Protocol         (Message (..), MessageTag)
-import           System.MQ.Transport        (PubChannel, PullChannel,
-                                             PushChannel, SubChannel)
-import qualified System.MQ.Transport        as T (pub, pull, push, sub)
+import           System.MQ.Component.Internal.Atomic (updateLastMsgId)
+import           System.MQ.Component.Internal.Env    (Env (..))
+import           System.MQ.Monad                     (MQMonad)
+import           System.MQ.Protocol                  (Message (..), MessageTag)
+import           System.MQ.Transport                 (PubChannel, PullChannel,
+                                                      PushChannel, SubChannel)
+import qualified System.MQ.Transport                 as T (pub, pull, push, sub)
 
 -- During creation of custom logic on communication level user MUST use ONLY THESE
 -- functions for receiving/sending messages from/to queue.

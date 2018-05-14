@@ -1,6 +1,6 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 
-module System.MQ.Component.Env
+module System.MQ.Component.Internal.Env
   (
     Name
   , Env (..)
@@ -8,10 +8,11 @@ module System.MQ.Component.Env
   , ThreeChannels (..)
   ) where
 
-import           Control.Concurrent.MVar
-import           System.MQ.Component.Atomic (Atomic)
-import           System.MQ.Protocol
-import           System.MQ.Transport
+import           Control.Concurrent.MVar             (MVar)
+import           System.MQ.Component.Internal.Atomic (Atomic)
+import           System.MQ.Protocol                  (Creator)
+import           System.MQ.Transport                 (PullChannel, PushChannel,
+                                                      SubChannel)
 
 
 type Name = String

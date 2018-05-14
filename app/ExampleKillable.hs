@@ -12,7 +12,7 @@ import           System.MQ.Monad               (MQMonad)
 import           System.MQ.Protocol            (Message (..))
 
 main :: IO ()
-main = runApp "example_killable" exampleKillable
+main = runApp "example_killable-hs" exampleKillable
 
 exampleKillable :: Env -> MQMonad ()
 exampleKillable env@Env{..} = do

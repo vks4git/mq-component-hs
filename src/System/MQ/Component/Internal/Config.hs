@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
-module System.MQ.Component.Config
+module System.MQ.Component.Internal.Config
   (
     loadEnv
   , load3Channels
@@ -9,16 +9,18 @@ module System.MQ.Component.Config
   , loadTechChannels
   ) where
 
-import           Control.Concurrent.MVar (newEmptyMVar)
-import           Control.Monad.IO.Class  (liftIO)
-import           Data.Aeson.Picker       ((|--))
-import qualified Data.Text               as T (Text, pack)
-import           System.BCD.Config       (getConfigText)
-import           System.MQ.Component.Env (Env (..), Name, ThreeChannels (..),
-                                          TwoChannels (..))
-import           System.MQ.Monad         (MQMonad)
-import           System.MQ.Transport     (ConnectTo (..), Host, HostPort (..),
-                                          Port, contextM)
+import           Control.Concurrent.MVar          (newEmptyMVar)
+import           Control.Monad.IO.Class           (liftIO)
+import           Data.Aeson.Picker                ((|--))
+import qualified Data.Text                        as T (Text, pack)
+import           System.BCD.Config                (getConfigText)
+import           System.MQ.Component.Internal.Env (Env (..), Name,
+                                                   ThreeChannels (..),
+                                                   TwoChannels (..))
+import           System.MQ.Monad                  (MQMonad)
+import           System.MQ.Transport              (ConnectTo (..), Host,
+                                                   HostPort (..), Port,
+                                                   contextM)
 
 
 loadEnv :: Name -> IO Env

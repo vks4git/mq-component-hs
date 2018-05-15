@@ -7,7 +7,7 @@ module ExampleBankTypes
 
 import           Data.Aeson              (FromJSON (..), ToJSON (..),
                                           genericParseJSON, genericToJSON)
-import           Data.Aeson.Casing       (aesonPrefix, snakeCase)
+import           Data.Aeson.Casing       (aesonDrop, snakeCase)
 import           GHC.Generics            (Generic)
 import qualified System.MQ.Encoding.JSON as JSON (pack, unpack)
 import           System.MQ.Protocol      (MessageLike (..), MessageType (..),
@@ -21,9 +21,9 @@ data BankConfig = BankConfig { months   :: Int
   deriving (Show, Generic)
 
 instance ToJSON BankConfig where
-  toJSON = genericToJSON $ aesonPrefix snakeCase
+  toJSON = genericToJSON $ aesonDrop 0 snakeCase
 instance FromJSON BankConfig where
-  parseJSON = genericParseJSON $ aesonPrefix snakeCase
+  parseJSON = genericParseJSON $ aesonDrop 0 snakeCase
 instance MessageLike BankConfig where
   props = Props "example_bank" Config jsonEncoding
   pack = JSON.pack

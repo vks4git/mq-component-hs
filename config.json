@@ -35,9 +35,18 @@
                 "port": ""
             }
         },
-        "example_controlled-hs": {
-            "creator": "0000-0000-0000-controlled",
-            "logfile": "/tmp/example_controlled.log",
+        "example_clock-ask-hs": {
+            "creator": "0000-0000-0000-clock-ask-hs",
+            "logfile": "/tmp/example_clock-ask-hs.log",
+            "frequency": 60000,
+            "controller": {
+                "host": "",
+                "port": ""
+            }
+        },
+        "example_clock-reply-hs": {
+            "creator": "0000-0000-0000-clock-replt-hs",
+            "logfile": "/tmp/example_clock-reply-hs.log",
             "frequency": 60000,
             "controller": {
                 "host": "localhost",

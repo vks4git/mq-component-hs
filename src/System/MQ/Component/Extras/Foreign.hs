@@ -12,14 +12,14 @@ import           Data.ByteString                        (ByteString)
 import qualified Data.ByteString                        as BS (null)
 import qualified Data.ByteString.Char8                  as BSC8 (unpack)
 import           System.Log.Logger                      (infoM)
-import           System.MQ.Component.Extras.Error       (throwComponentError)
+import           System.MQ.Component.Extras.Error       (throwForeignError)
 import           System.MQ.Component.Internal.Config    (load2Channels)
 import           System.MQ.Component.Internal.Env       (Env (..),
                                                          TwoChannels (..))
 import           System.MQ.Component.Internal.Transport (SubChannel, push, sub)
-import           System.MQ.Monad                        (MQError, MQMonad)
-import           System.MQ.Protocol                     (Hash, MQErrorData (..),
-                                                         Message (..),
+import           System.MQ.Error                        (MQError (..))
+import           System.MQ.Monad                        (MQMonad)
+import           System.MQ.Protocol                     (Hash, Message (..),
                                                          MessageLike (..),
                                                          MessageTag, Timestamp,
                                                          createMessage,
@@ -68,4 +68,4 @@ callForeignComponent env@Env{..} curId expires mdata = do
     handleSub _ = return ("", error "Received broken message.")
 
     errorMsgToError :: ByteString -> MQMonad b
-    errorMsgToError = (throwComponentError . errorMessage =<<) . unpackM
+    errorMsgToError bs = unpackM bs >>= throwForeignError . errorMessage

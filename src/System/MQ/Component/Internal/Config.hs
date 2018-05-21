@@ -81,8 +81,9 @@ techHelper SchedulerCfg{..} = HostPort host techport
 controllerFromConfig :: Name -> IO ControllerCfg
 controllerFromConfig name' = do
     config <- getConfigText
-    let getField f = config |-- ["params", T.pack name', "controller", f]
-    pure . ControllerCfg $ HostPort (getField "host") (getField "port")
+    let host' = config |-- ["deploy", "monique", "controller", "host"]
+    let port' = config |-- ["params", T.pack name', "port"]
+    pure . ControllerCfg $ HostPort host' port'
 
 schedulerInFromConfig :: IO SchedulerCfg
 schedulerInFromConfig = schedulerFromJSON ["deploy", "monique", "scheduler-in"]

@@ -13,6 +13,9 @@
               "host": "127.0.0.1",
               "comport": 9001,
               "techport": 9025
+          },
+          "controller": {
+              "host": "127.0.0.1"
           }
         }
     },
@@ -20,38 +23,23 @@
         "example_radio-speaker-hs": {
             "creator": "0000-0000-0000-radio-speaker",
             "logfile": "/tmp/example_radio-speaker.log",
-            "frequency": 60000,
-            "controller": {
-                "host": "",
-                "port": ""
-            }
+            "frequency": 60000
         },
         "example_radio-listener-hs": {
             "creator": "0000-0000-0000-radio-listener",
             "logfile": "/tmp/example_radio-listener.log",
-            "frequency": 60000,
-            "controller": {
-                "host": "",
-                "port": ""
-            }
+            "frequency": 60000
         },
         "example_clock-ask-hs": {
             "creator": "0000-0000-0000-clock-ask-hs",
             "logfile": "/tmp/example_clock-ask-hs.log",
-            "frequency": 60000,
-            "controller": {
-                "host": "",
-                "port": ""
-            }
+            "frequency": 60000
         },
         "example_clock-reply-hs": {
             "creator": "0000-0000-0000-clock-replt-hs",
             "logfile": "/tmp/example_clock-reply-hs.log",
             "frequency": 60000,
-            "controller": {
-                "host": "localhost",
-                "port": 10000
-            }
+            "port": 10000
         },
         "example_killable-hs": {
             "creator": "0000-0000-0000-killable",
@@ -66,20 +54,12 @@
         "example_calculator-hs": {
             "creator": "0000-0000-0000-calculator",
             "logfile": "/tmp/example_calculator.log",
-            "frequency": 60000,
-            "controller": {
-                "host": "",
-                "port": ""
-            }
+            "frequency": 60000
         },
         "example_bank-hs": {
             "creator": "0000-0000-0000-bank",
             "logfile": "/tmp/example_bank.log",
-            "frequency": 60000,
-            "controller": {
-                "host": "",
-                "port": ""
-            }
+            "frequency": 60000
         }
     }
 }

@@ -22,8 +22,9 @@ import           Control.Monad.IO.Class                    (MonadIO, liftIO)
 import           System.MQ.Component.Internal.Atomic.Types (Atomic (..),
                                                             IsAlive, isAlive,
                                                             lastMsgId, message)
-import           System.MQ.Monad                           (MQError (..),
-                                                            MQMonad)
+import           System.MQ.Error                           (MQError (..),
+                                                            errorComponent)
+import           System.MQ.Monad                           (MQMonad)
 import           System.MQ.Protocol                        (Hash, emptyHash)
 
 -- | Creates new 'Atomic' with information only about communication 'ThreadId'.
@@ -62,7 +63,7 @@ getLastMsgId :: MVar Atomic -> MQMonad Hash
 getLastMsgId = fromMMQ . tryLastMsgId
   where
     fromMMQ :: MQMonad (Maybe Hash) -> MQMonad Hash
-    fromMMQ = (maybe (throwError $ MQComponentError "Can't get message id because from Atomic.") pure =<<)
+    fromMMQ = (maybe (throwError $ MQError errorComponent "can't get message id from atomic") pure =<<)
 
 -- | Returns isAlive from 'Atomic' if possible.
 --

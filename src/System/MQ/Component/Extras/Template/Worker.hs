@@ -20,6 +20,8 @@ import qualified System.MQ.Component.Internal.Env          as C2 (TwoChannels (.
 import qualified System.MQ.Component.Internal.Env          as C3 (ThreeChannels (..))
 import           System.MQ.Component.Internal.Transport    (PushChannel, pull,
                                                             push, sub)
+import           System.MQ.Error                           (MQError (..),
+                                                            errorComponent)
 import           System.MQ.Monad                           (MQMonad,
                                                             foreverSafe,
                                                             runMQMonad)
@@ -33,7 +35,6 @@ import           System.MQ.Protocol                        (Condition (..),
                                                             messageSpec,
                                                             messageType,
                                                             notExpires)
-import           System.MQ.Protocol.Error                  (MQErrorData (..))
 
 -- | Given 'WorkerAction' acts as component's communication layer that receives messages of type 'a'
 -- from scheduler, processes them using 'WorkerAction' and sends result of type 'b' back to scheduler.
@@ -94,7 +95,7 @@ worker wType action env@Env{..} = do
 
         case responseE of
           Right response -> createMessage curId creator notExpires response >>= push schedulerIn env
-          Left  m        -> createMessage curId creator notExpires (MQErrorData m) >>= push schedulerIn env
+          Left  m        -> createMessage curId creator notExpires (MQError errorComponent m) >>= push schedulerIn env
 
     handleError :: MQMonad b -> IO (Either String b)
     handleError valM = (Right <$> runMQMonad valM) `catch` (return . Left . toMeaningfulError)

@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.1.2.1] - 2018-05-23
+### Changed
+- foreignComponentCall closes context opened by itself
+
 ## [0.1.2.0] - 2018-05-17
 ### Changed
 - MQError in `mq` library.

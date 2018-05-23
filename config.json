@@ -36,7 +36,7 @@
             "frequency": 60000
         },
         "example_clock-reply-hs": {
-            "creator": "0000-0000-0000-clock-replt-hs",
+            "creator": "0000-0000-0000-clock-reply-hs",
             "logfile": "/tmp/example_clock-reply-hs.log",
             "frequency": 60000,
             "port": 10000

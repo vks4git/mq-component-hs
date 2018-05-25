@@ -1,4 +1,3 @@
-{-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE RecordWildCards     #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
@@ -9,53 +8,61 @@ module System.MQ.Component.Extras.Template.Listener
 
 import           Control.Monad                             (when)
 import           Data.String                               (fromString)
-import           System.MQ.Component.Extras.Template.Types (MQActionVoid)
+import           System.MQ.Component.Extras.Template.Types (MQActionVoidS)
+import           System.MQ.Component.Internal.Atomic       (updateLastMsgId)
 import           System.MQ.Component.Internal.Config       (load2Channels,
                                                             loadTechChannels)
 import           System.MQ.Component.Internal.Env          (Env (..),
                                                             TwoChannels (..))
-import           System.MQ.Component.Internal.Transport    (SubChannel, sub)
-import           System.MQ.Monad                           (MQMonad,
+import           System.MQ.Monad                           (MQMonadS,
                                                             foreverSafe)
 import           System.MQ.Protocol                        (Condition (..),
                                                             Message (..),
                                                             MessageLike (..),
                                                             MessageTag,
-                                                            Props (..), matches,
+                                                            Props (..),
+                                                            emptyHash, matches,
                                                             messageSpec,
                                                             messageType)
+import           System.MQ.Transport                       (SubChannel, sub)
 
 
 -- | Listener of communication level's scheduler
 --
-listenerComm :: MessageLike a => MQActionVoid a -> Env -> MQMonad ()
+listenerComm :: MessageLike a => MQActionVoidS s a -> Env -> MQMonadS s ()
 listenerComm analyser env = load2Channels >>= listenerWithChannels analyser env
 
 -- | Listener of technical level's scheduler
 --
-listenerTech :: MessageLike a => MQActionVoid a -> Env -> MQMonad ()
+listenerTech :: MessageLike a => MQActionVoidS s a -> Env -> MQMonadS s ()
 listenerTech analyser env = loadTechChannels >>= listenerWithChannels analyser env
 
 -- | Template `listener` allows user to gather data from queue and perform different actions with it
 --
-listenerWithChannels :: MessageLike a => MQActionVoid a -> Env -> TwoChannels -> MQMonad ()
+listenerWithChannels :: MessageLike a => MQActionVoidS s a -> Env -> TwoChannels -> MQMonadS s ()
 listenerWithChannels analyser env@Env{..} TwoChannels{..} = foreverSafe name $ obtainData env fromScheduler analyser
 
 -- | Receive from queue message with given type, spec and pId and process it using 'MQActionVoid'
 --
-obtainData :: forall a . MessageLike a => Env -> SubChannel -> MQActionVoid a -> MQMonad ()
-obtainData env subChannel analyser = do
-    (tag, Message{..}) <- sub subChannel env
+obtainData :: forall a s. MessageLike a => Env -> SubChannel -> MQActionVoidS s a -> MQMonadS s ()
+obtainData env@Env{..} subChannel analyser = do
+    (tag, Message{..}) <- sub subChannel
 
     when (filterTag tag) $ do
-      subData <- unpackM msgData
-      analyser env subData
+      -- Set 'lastMsgId' to id of message that worker will process
+      updateLastMsgId msgId atomic
+
+      -- Process data from message using 'action'
+      unpackM msgData >>= analyser env
+
+      -- After message has been processed, clear 'lastMsgId'
+      updateLastMsgId emptyHash atomic
 
   where
     Props{..} = props :: Props a
 
     mType = mtype
-    mSpec = fromString $ spec
+    mSpec = fromString spec
 
     filterTag :: MessageTag -> Bool
     filterTag = (`matches` (messageType :== mType :&& messageSpec :== mSpec))

@@ -6,46 +6,47 @@ module System.MQ.Component.Extras.Template.Worker
   , workerScheduler
   ) where
 
-import           Control.Exception                         (SomeException,
+import           Control.Exception                         (Exception,
+                                                            SomeException (..),
                                                             catch)
 import           Control.Monad                             (when)
 import           Control.Monad.Except                      (liftIO)
-import           Data.List                                 (elemIndex)
-import           Data.String                               (fromString)
-import           System.MQ.Component.Extras.Template.Types (MQAction)
+import           Control.Monad.State.Strict                (get)
+import           System.MQ.Component.Extras.Template.Types (MQActionS)
+import           System.MQ.Component.Internal.Atomic       (updateLastMsgId)
 import           System.MQ.Component.Internal.Config       (load2Channels,
                                                             load3Channels)
-import           System.MQ.Component.Internal.Env          (Env (..))
-import qualified System.MQ.Component.Internal.Env          as C2 (TwoChannels (..))
-import qualified System.MQ.Component.Internal.Env          as C3 (ThreeChannels (..))
-import           System.MQ.Component.Internal.Transport    (PushChannel, pull,
-                                                            push, sub)
+import           System.MQ.Component.Internal.Env          (Env (..),
+                                                            ThreeChannels (..),
+                                                            TwoChannels (..))
 import           System.MQ.Error                           (MQError (..),
                                                             errorComponent)
-import           System.MQ.Monad                           (MQMonad,
+import           System.MQ.Monad                           (MQMonadS,
                                                             foreverSafe,
-                                                            runMQMonad)
+                                                            runMQMonadS)
 import           System.MQ.Protocol                        (Condition (..),
                                                             Hash, Message (..),
                                                             MessageLike (..),
                                                             MessageTag,
                                                             Props (..),
                                                             createMessage,
-                                                            matches,
+                                                            emptyHash, matches,
                                                             messageSpec,
                                                             messageType,
                                                             notExpires)
+import           System.MQ.Transport                       (PushChannel, pull,
+                                                            push, sub)
 
 -- | Given 'WorkerAction' acts as component's communication layer that receives messages of type 'a'
 -- from scheduler, processes them using 'WorkerAction' and sends result of type 'b' back to scheduler.
 --
-workerScheduler :: (MessageLike a, MessageLike b) => MQAction a b -> Env -> MQMonad ()
+workerScheduler :: (MessageLike a, MessageLike b) => MQActionS s a b -> Env -> MQMonadS s ()
 workerScheduler = worker Scheduler
 
 -- | Given 'WorkerAction' acts as component's communication layer that receives messages of type 'a'
 -- from controller, processes them using 'WorkerAction' and sends result of type 'b' to scheduler.
 --
-workerController :: (MessageLike a, MessageLike b) => MQAction a b -> Env -> MQMonad ()
+workerController :: (MessageLike a, MessageLike b) => MQActionS s a b -> Env -> MQMonadS s ()
 workerController = worker Controller
 
 --------------------------------------------------------------------------------
@@ -58,13 +59,13 @@ data WorkerType = Scheduler | Controller deriving (Eq, Show)
 
 -- | Alias for function that given environment receives messages from queue.
 --
-type MessageReceiver = Env -> MQMonad (MessageTag, Message)
+type MessageReceiver s = MQMonadS s (MessageTag, Message)
 
 -- | Given 'WorkerType' and 'WorkerAction' acts as component's communication layer
 -- that receives messages of type 'a' from scheduler or controller (depending on 'WorkerType'),
 -- processes them using 'WorkerAction' and sends result of type 'b' to scheduler.
 --
-worker :: forall a b . (MessageLike a, MessageLike b) => WorkerType -> MQAction a b -> Env -> MQMonad ()
+worker :: forall a b s. (MessageLike a, MessageLike b) => WorkerType -> MQActionS s a b -> Env -> MQMonadS s ()
 worker wType action env@Env{..} = do
     -- Depending on 'WorkerType', we define function using which worker will receive
     -- messages from queue. Also we define channel through which worker will
@@ -72,38 +73,43 @@ worker wType action env@Env{..} = do
     (msgReceiver, schedulerIn) <- msgRecieverAndSchedulerIn
 
     foreverSafe name $ do
-        (tag, Message{..}) <- msgReceiver env
-        when (checkTag tag) $ unpackM msgData >>= processTask schedulerIn msgId
+        (tag, Message{..}) <- msgReceiver
+        state <- get
+        when (checkTag tag) $ do
+            -- Set 'lastMsgId' to id of message that worker will process
+            updateLastMsgId msgId atomic
+
+            -- Process data from message using 'action'
+            unpackM msgData >>= processTask state schedulerIn msgId
+
+            -- After message has been processed, clear 'lastMsgId'
+            updateLastMsgId emptyHash atomic
+
   where
-    msgRecieverAndSchedulerIn :: MQMonad (MessageReceiver, PushChannel)
+    msgRecieverAndSchedulerIn :: MQMonadS s (MessageReceiver s, PushChannel)
     msgRecieverAndSchedulerIn =
       case wType of
-        Scheduler  -> load2Channels >>= return . (\x -> (sub $ C2.fromScheduler x, C2.toScheduler x))
-        Controller -> load3Channels name >>= return . (\x -> (pull $ C3.fromController x, C3.toScheduler x))
+        Scheduler  -> (\(TwoChannels fs ts) -> (sub fs, ts)) <$> load2Channels
+        Controller -> (\(ThreeChannels _ ts fc) -> (pull fc, ts)) <$> load3Channels name
 
     messageProps :: Props a
     messageProps = props
 
     checkTag :: MessageTag -> Bool
-    checkTag = (`matches` (messageSpec :== fromString (spec messageProps) :&& messageType :== mtype messageProps))
+    checkTag = (`matches` (messageSpec :== spec messageProps :&& messageType :== mtype messageProps))
 
-    processTask :: PushChannel -> Hash -> a -> MQMonad ()
-    processTask schedulerIn curId config = do
+    processTask :: s -> PushChannel -> Hash -> a -> MQMonadS s ()
+    processTask state schedulerIn curId config = do
         -- Runtime errors may occur during execution of 'WorkerAction'. In order to process them
         -- without failures we use function 'handleError' that turns 'IOException's into 'MQError's
-        responseE <- liftIO $ handleError $ action env config
+        responseE <- liftIO $ handleError state $ action env config
 
         case responseE of
-          Right response -> createMessage curId creator notExpires response >>= push schedulerIn env
-          Left  m        -> createMessage curId creator notExpires (MQError errorComponent m) >>= push schedulerIn env
+          Right response -> createMessage curId creator notExpires response >>= push schedulerIn
+          Left  e        -> createMessage curId creator notExpires (MQError errorComponent $ toMeaningfulError e) >>= push schedulerIn
 
-    handleError :: MQMonad b -> IO (Either String b)
-    handleError valM = (Right <$> runMQMonad valM) `catch` (return . Left . toMeaningfulError)
+    handleError :: s -> MQMonadS s b -> IO (Either SomeException b)
+    handleError state valM = (Right . fst <$> runMQMonadS valM state) `catch` (return . Left)
 
-    toMeaningfulError :: SomeException -> String
-    toMeaningfulError e = res
-      where
-        errorMsg = show e
-        indexM = elemIndex '\n' errorMsg
-
-        res = maybe errorMsg (flip take errorMsg) indexM
+    toMeaningfulError :: Exception e => e -> String
+    toMeaningfulError = show

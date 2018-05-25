@@ -4,6 +4,7 @@
 module System.MQ.Component.Internal.App
   (
     runApp
+  , runAppS
   , runAppWithTech
   , runTech
   , processKill

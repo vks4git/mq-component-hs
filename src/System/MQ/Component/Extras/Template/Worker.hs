@@ -7,7 +7,6 @@ module System.MQ.Component.Extras.Template.Worker
   ) where
 
 import           Control.Exception                         (Exception(..),
-                                                            SomeException (..),
                                                             catch)
 import           Control.Monad                             (when)
 import           Control.Monad.Except                      (liftIO)
@@ -27,7 +26,7 @@ import           System.MQ.Monad                           (MQMonadS,
                                                             foreverSafe,
                                                             runMQMonadS)
 import           System.MQ.Protocol                        (Condition (..),
-                                                            Hash, Message (..),
+                                                            Message (..),
                                                             MessageLike (..),
                                                             MessageTag,
                                                             Props (..),

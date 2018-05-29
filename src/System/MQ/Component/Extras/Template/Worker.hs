@@ -6,7 +6,7 @@ module System.MQ.Component.Extras.Template.Worker
   , workerScheduler
   ) where
 
-import           Control.Exception                         (Exception(..),
+import           Control.Exception                         (Exception(..), SomeException,
                                                             catch)
 import           Control.Monad                             (when)
 import           Control.Monad.Except                      (liftIO)
@@ -74,7 +74,6 @@ worker wType action env@Env{..} = do
     (msgReceiver, schedulerIn) <- msgRecieverAndSchedulerIn
 
     foreverSafe name $ do
-        -- (tag, Message{..}) <- msgReceiver
         (tag, msg@Message{..}) <- msgReceiver
         state <- get
         when (checkTag tag) $ do
@@ -113,11 +112,15 @@ worker wType action env@Env{..} = do
     handleError :: s -> MQMonadS s b -> IO (Either MQError b)
     handleError state valM = catch (Right . fst <$> runMQMonadS valM state) handler
       where
+        handler :: SomeException -> IO (Either MQError b)
         handler e = do
             errorM name $! show e
-            return . Left $ case (fromException e :: Maybe MQError) of
-                                (Just mqErr) -> mqErr
-                                Nothing -> MQError errorComponent $ show e
+            let anyError = MQError errorComponent $ show e
+            return . Left $ maybe anyError id (fromException e :: Maybe MQError)
+
+            -- case (fromException e :: Maybe MQError) of
+            --   (Just mqErr) -> return . Left $ mqErr
+            --   Nothing -> return . Left . MQError errorComponent $ show e
 
     dropCallStack :: String -> String
     dropCallStack str = maybe str (\i -> take i str) $ findIndex (isPrefixOf "\nCallStack") (tails str)

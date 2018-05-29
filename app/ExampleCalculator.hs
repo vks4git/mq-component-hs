@@ -22,12 +22,11 @@ main = runApp "example_calculator-hs" $ workerScheduler calculatorWorkerAction
 --
 calculatorWorkerAction :: MQAction CalculatorConfig CalculatorResult
 calculatorWorkerAction Env{..} CalculatorConfig{..} = do
-    -- this error will be caught by worker template
-    -- error "uncaught error"
-
     -- log messages can be written this way
-    liftIO $ infoM name "Info log mesage"
+    liftIO $ infoM name "Info log message"
     case action of
+      -- this error will be caught by worker template
+      "-" -> error "we can't subtract"
       "+" -> return . CalculatorResult $ first + second
       -- catch runtime error and throw custom MQError
       "*" -> catchRuntimeError (CalculatorResult $ first * second) throwComponentError "Oops, some runtime error"

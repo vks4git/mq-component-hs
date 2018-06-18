@@ -21,7 +21,7 @@ import           System.MQ.Protocol                        (Condition (..),
                                                             MessageLike (..),
                                                             MessageTag,
                                                             Props (..),
-                                                            emptyHash, matches,
+                                                            emptyId, matches,
                                                             messageSpec,
                                                             messageType)
 import           System.MQ.Transport                       (SubChannel, sub)
@@ -56,14 +56,12 @@ obtainData env@Env{..} subChannel analyser = do
       unpackM msgData >>= analyser env
 
       -- After message has been processed, clear 'lastMsgId'
-      updateLastMsgId emptyHash atomic
+      updateLastMsgId emptyId atomic
 
   where
     Props{..} = props :: Props a
 
-    mType = mtype
-    mSpec = fromString spec
 
     filterTag :: MessageTag -> Bool
-    filterTag = (`matches` (messageType :== mType :&& messageSpec :== mSpec))
+    filterTag = (`matches` (messageType :== mtype :&& messageSpec :== spec))
 

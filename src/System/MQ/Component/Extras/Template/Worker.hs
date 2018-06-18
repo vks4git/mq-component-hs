@@ -31,7 +31,7 @@ import           System.MQ.Protocol                        (Condition (..),
                                                             MessageTag,
                                                             Props (..),
                                                             createMessage,
-                                                            emptyHash, matches,
+                                                            emptyId, matches,
                                                             messageSpec,
                                                             messageType,
                                                             notExpires)
@@ -84,7 +84,7 @@ worker wType action env@Env{..} = do
             processTask state schedulerIn msg
 
             -- After message has been processed, clear 'lastMsgId'
-            updateLastMsgId emptyHash atomic
+            updateLastMsgId emptyId atomic
 
   where
     msgRecieverAndSchedulerIn :: MQMonadS s (MessageReceiver s, PushChannel)

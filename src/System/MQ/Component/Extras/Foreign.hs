@@ -12,6 +12,7 @@ import           Control.Monad.Fix                   (fix)
 import           Data.ByteString                     (ByteString)
 import qualified Data.ByteString                     as BS (null)
 import qualified Data.ByteString.Char8               as BSC8 (unpack)
+import           Data.Text                           as T (unpack)
 import           System.Log.Logger                   (infoM)
 import           System.MQ.Component.Extras.Error    (throwForeignError)
 import           System.MQ.Component.Internal.Config (load2ChannelsWithContext)
@@ -19,7 +20,7 @@ import           System.MQ.Component.Internal.Env    (Env (..),
                                                       TwoChannels (..))
 import           System.MQ.Error                     (MQError (..))
 import           System.MQ.Monad                     (MQMonadS)
-import           System.MQ.Protocol                  (Hash, Message (..),
+import           System.MQ.Protocol                  (Id, Message (..),
                                                       MessageLike (..),
                                                       MessageTag, Timestamp,
                                                       createMessage, messagePid)
@@ -31,7 +32,7 @@ import           System.MQ.Transport                 (Context, SubChannel,
 -- IMPORTANT: in MoniQue should exist and be running component that will
 -- respond to that message, otherwise call will stuck in an infinite loop.
 callForeignComponent :: forall a b s . (MessageLike a, MessageLike b) => Env       -- ^ 'Env' of component
-                                                                      -> Hash      -- ^ id of message that begets message that will be send
+                                                                      -> Id        -- ^ id of message that begets message that will be send
                                                                       -> Timestamp -- ^ expiration date of message that will be sent to foreign component
                                                                       -> a         -- ^ data that will be sent in message
                                                                       -> MQMonadS s b -- ^ result of foreign component's computation
@@ -41,7 +42,7 @@ callForeignComponent Env{..} curId expires mdata = do
 
     dataMsg@Message{..} <- createMessage curId creator expires mdata
 
-    liftIO $ infoM name $ "FOREIGN CALL: Sending message with id " ++ BSC8.unpack msgId ++ " to queue"
+    liftIO $ infoM name $ "FOREIGN CALL: Sending message with id " ++ T.unpack msgId ++ " to queue"
     push toScheduler dataMsg
 
     responseData <- receiveResponse fromScheduler msgId `catchError` catchWithClose context channels
@@ -53,20 +54,20 @@ callForeignComponent Env{..} curId expires mdata = do
 
   where
     -- Receives messages from queue until message with given pId is received
-    receiveResponse :: SubChannel -> Hash -> MQMonadS s b
+    receiveResponse :: SubChannel -> Id -> MQMonadS s b
     receiveResponse schedulerOut pId = fix $ \action -> do
         (tag, Message{..}) <- sub schedulerOut `catchError` handleSub
 
         -- If message's tag is empty, that means message is broken and
         -- we should wait for next message. Otherwise we check whether
         -- tag's pId matches given 'pId'
-        if not (BS.null tag) && checkTag pId tag
+        if not (tag == "") && checkTag pId tag
           then do
-              liftIO $ infoM name $ "FOREIGN CALL: Received response for message with id " ++ BSC8.unpack msgPid ++ " from queue"
+              liftIO $ infoM name $ "FOREIGN CALL: received response for message with id " ++ T.unpack msgPid ++ " from queue"
               unpackM msgData `catchError` const (errorMsgToError msgData)
           else action
 
-    checkTag :: Hash -> MessageTag -> Bool
+    checkTag :: Id -> MessageTag -> Bool
     checkTag pId = (== pId) . messagePid
 
     -- | If message received from queue can't be decoded into MoniQue message,

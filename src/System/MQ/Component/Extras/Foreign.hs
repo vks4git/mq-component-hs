@@ -10,8 +10,6 @@ import           Control.Monad.Except                (catchError, liftIO,
                                                       throwError)
 import           Control.Monad.Fix                   (fix)
 import           Data.ByteString                     (ByteString)
-import qualified Data.ByteString                     as BS (null)
-import qualified Data.ByteString.Char8               as BSC8 (unpack)
 import           Data.Text                           as T (unpack)
 import           System.Log.Logger                   (infoM)
 import           System.MQ.Component.Extras.Error    (throwForeignError)
@@ -22,8 +20,9 @@ import           System.MQ.Error                     (MQError (..))
 import           System.MQ.Monad                     (MQMonadS)
 import           System.MQ.Protocol                  (Id, Message (..),
                                                       MessageLike (..),
-                                                      MessageTag, Timestamp,
-                                                      createMessage, messagePid)
+                                                      MessageTag, Secure (..),
+                                                      Timestamp, createMessage,
+                                                      messagePid)
 import           System.MQ.Transport                 (Context, SubChannel,
                                                       closeM, contextM, push,
                                                       sub, terminateM)
@@ -40,7 +39,7 @@ callForeignComponent Env{..} curId expires mdata = do
     context <- contextM
     channels@TwoChannels{..} <- load2ChannelsWithContext context
 
-    dataMsg@Message{..} <- createMessage curId creator expires mdata
+    dataMsg@Message{..} <- createMessage curId creator expires NotSecured mdata
 
     liftIO $ infoM name $ "FOREIGN CALL: Sending message with id " ++ T.unpack msgId ++ " to queue"
     push toScheduler dataMsg

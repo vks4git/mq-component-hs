@@ -6,13 +6,15 @@ module System.MQ.Component.Extras.Template.Worker
   , workerScheduler
   ) where
 
-import           Control.Exception                         (Exception(..), SomeException,
+import           Control.Exception                         (Exception (..),
+                                                            SomeException,
                                                             catch)
 import           Control.Monad                             (when)
 import           Control.Monad.Except                      (liftIO)
 import           Control.Monad.State.Strict                (get)
+import           Data.List                                 (findIndex,
+                                                            isPrefixOf, tails)
 import           System.Log.Logger                         (errorM)
-import           Data.List                                 (findIndex, isPrefixOf, tails)
 import           System.MQ.Component.Extras.Template.Types (MQActionS)
 import           System.MQ.Component.Internal.Atomic       (updateLastMsgId)
 import           System.MQ.Component.Internal.Config       (load2Channels,
@@ -30,6 +32,7 @@ import           System.MQ.Protocol                        (Condition (..),
                                                             MessageLike (..),
                                                             MessageTag,
                                                             Props (..),
+                                                            Secure (..),
                                                             createMessage,
                                                             emptyId, matches,
                                                             messageSpec,
@@ -106,8 +109,8 @@ worker wType action env@Env{..} = do
         responseE <- liftIO . handleError state $ (unpackM msgData >>= action env)
 
         case responseE of
-          Right response      -> createMessage msgId creator notExpires response >>= push schedulerIn
-          Left  (MQError c m) -> createMessage msgId creator notExpires (MQError c $ dropCallStack m) >>= push schedulerIn
+          Right response      -> createMessage msgId creator notExpires NotSecured response >>= push schedulerIn
+          Left  (MQError c m) -> createMessage msgId creator notExpires NotSecured (MQError c $ dropCallStack m) >>= push schedulerIn
 
     handleError :: s -> MQMonadS s b -> IO (Either MQError b)
     handleError state valM = catch (Right . fst <$> runMQMonadS valM state) handler

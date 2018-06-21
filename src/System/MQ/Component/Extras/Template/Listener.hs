@@ -7,7 +7,6 @@ module System.MQ.Component.Extras.Template.Listener
   ) where
 
 import           Control.Monad                             (when)
-import           Data.String                               (fromString)
 import           System.MQ.Component.Extras.Template.Types (MQActionVoidS)
 import           System.MQ.Component.Internal.Atomic       (updateLastMsgId)
 import           System.MQ.Component.Internal.Config       (load2Channels,
@@ -20,8 +19,8 @@ import           System.MQ.Protocol                        (Condition (..),
                                                             Message (..),
                                                             MessageLike (..),
                                                             MessageTag,
-                                                            Props (..),
-                                                            emptyId, matches,
+                                                            Props (..), emptyId,
+                                                            matches,
                                                             messageSpec,
                                                             messageType)
 import           System.MQ.Transport                       (SubChannel, sub)

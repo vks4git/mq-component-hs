@@ -65,6 +65,9 @@ executable example-radio-speaker
   build-depends:       base
                      , aeson
                      , mq
+                     , text
+                     , containers
+                     , data-msgpack-types
                      , mq-component-hs
   default-language:    Haskell2010
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -O2
@@ -75,57 +78,60 @@ executable example-radio-listener
   other-modules:       ExampleRadioTypes
   build-depends:       base
                      , aeson
+                     , data-msgpack-types
+                     , containers
                      , mq
+                     , text
                      , mq-component-hs
   default-language:    Haskell2010
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -O2
 
-executable example-calculator
-  hs-source-dirs:      app
-  main-is:             ExampleCalculator.hs
-  other-modules:       ExampleCalculatorTypes
-  build-depends:       base
-                     , aeson
-                     , hslogger
-                     , mq
-                     , mq-component-hs
-  default-language:    Haskell2010
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -O2
+-- executable example-calculator
+--   hs-source-dirs:      app
+--   main-is:             ExampleCalculator.hs
+--   other-modules:       ExampleCalculatorTypes
+--   build-depends:       base
+--                      , aeson
+--                      , hslogger
+--                      , mq
+--                      , mq-component-hs
+--   default-language:    Haskell2010
+--   ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -O2
 
-executable example-bank
-  hs-source-dirs:      app
-  main-is:             ExampleBank.hs
-  other-modules:       ExampleBankTypes
-                     , ExampleCalculatorTypes
-  build-depends:       base
-                     , aeson
-                     , aeson-casing
-                     , mq
-                     , mq-component-hs
-  default-language:    Haskell2010
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -O2
+-- executable example-bank
+--   hs-source-dirs:      app
+--   main-is:             ExampleBank.hs
+--   other-modules:       ExampleBankTypes
+--                      , ExampleCalculatorTypes
+--   build-depends:       base
+--                      , aeson
+--                      , aeson-casing
+--                      , mq
+--                      , mq-component-hs
+--   default-language:    Haskell2010
+--   ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -O2
 
-executable example-clock-ask
-  hs-source-dirs:      app
-  main-is:             ExampleClockAsk.hs
-  other-modules:       ExampleClockTypes
-  build-depends:       base
-                     , aeson
-                     , mq
-                     , mq-component-hs
-  default-language:    Haskell2010
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -O2
+-- executable example-clock-ask
+--   hs-source-dirs:      app
+--   main-is:             ExampleClockAsk.hs
+--   other-modules:       ExampleClockTypes
+--   build-depends:       base
+--                      , aeson
+--                      , mq
+--                      , mq-component-hs
+--   default-language:    Haskell2010
+--   ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -O2
 
-executable example-clock-reply
-  hs-source-dirs:      app
-  main-is:             ExampleClockReply.hs
-  other-modules:       ExampleClockTypes
-  build-depends:       base
-                     , aeson
-                     , mq
-                     , mq-component-hs
-  default-language:    Haskell2010
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -O2
+-- executable example-clock-reply
+--   hs-source-dirs:      app
+--   main-is:             ExampleClockReply.hs
+--   other-modules:       ExampleClockTypes
+--   build-depends:       base
+--                      , aeson
+--                      , mq
+--                      , mq-component-hs
+--   default-language:    Haskell2010
+--   ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -O2
 
 source-repository head
   type:     git
